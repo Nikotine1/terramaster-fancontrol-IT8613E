@@ -1,8 +1,11 @@
 # Fan control for TerraMaster on Linux 
 
-Tested with F4-220. This a direct port of the Xpenology fancontrol script by Eudean to work on OMV/Debian.
+Tested with F4-424 Pro. This a direct port of the Xpenology fancontrol script by Eudean to work on OMV/Debian.
 
 Original author: https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-control/?ct=1559481439
+
+This fork implements changes for it to work with NAS devices containing the IT8613E chipset, instead of the original IT8772E.
+These changes are based on this post: https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-control/?do=findComment&comment=264172
 
 ## Installation:
 1. Clone the repo
@@ -30,9 +33,9 @@ This far from perfect and if you're a Linux wizard you probably can do something
 
 4. Run the compiled program (command descriptions in the author's thread).
 
-``sudo ./fancontrol 1 40 ``
+``sudo ./fancontrol 1 37 ``
 
-This will run it in debug mode (1) with temperature setpoint= 40c. Make sure run with fancontrol with sudo.
+This will run it in debug mode (1) with temperature setpoint= 37c. Make sure run with fancontrol with sudo.
 
 5. Alternatively you can use the included systemd service. Copy it to `/etc/systemd/system`. Also, copy the binary to `/usr/local/bin/fancontrol`.
 
