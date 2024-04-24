@@ -9,7 +9,7 @@ These changes are based on this post: https://xpenology.com/forum/topic/14007-te
 
 ## Installation:
 1. Clone the repo
-``git clone https://github.com/ahmedmagdiosman/terramaster-fancontrol.git``
+``git clone https://github.com/Nikotine1/terramaster-fancontrol-IT8613E``
 
 2. Build with GCC. I'm using the docker image for ease of use.
 
