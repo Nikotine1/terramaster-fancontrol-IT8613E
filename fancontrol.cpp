@@ -121,15 +121,15 @@ int main(int argc, char * argv[]) {
   // Obtain access to IO ports
   iopl(3);
 
-  // Initialize the IT8772E
+  // Initialize the IT8613E
   outb(0x87, port);
   outb(0x01, port);
   outb(0x55, port);
   outb(0x55, port);
 
-  // Sanity check that this is the 8772
-  assert(ioread(0x20) == 0x87);
-  assert(ioread(0x21) == 0x72);
+  // Sanity check that this is the IT8613E
+  assert(ioread(0x20) == 0x86);
+  assert(ioread(0x21) == 0x13);
 
   // Set LDN = 4 to access environment registers
   iowrite(0x07, 0x04);
