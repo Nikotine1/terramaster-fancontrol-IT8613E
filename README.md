@@ -7,6 +7,8 @@ Original author: https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-
 This fork implements changes for it to work with NAS devices containing the IT8613E chipset, instead of the original IT8772E.
 These changes are based on this post: https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-control/?do=findComment&comment=264172
 
+You can verify which chip you have using ``sensors-detect``.
+
 ## Installation:
 1. Clone the repo
 ``git clone https://github.com/Nikotine1/terramaster-fancontrol-IT8613E``
