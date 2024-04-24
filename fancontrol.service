@@ -2,7 +2,7 @@
 Description=Fancontrol
 
 [Service]
-ExecStart=/usr/local/bin/fancontrol 0 43
+ExecStart=/usr/local/bin/fancontrol 0 37
 Restart=on-failure
 
 [Install]
