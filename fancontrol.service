@@ -2,8 +2,8 @@
 Description=Fancontrol
 
 [Service]
-ExecStart=/usr/local/bin/fancontrol 0 37
+ExecStart=/usr/local/bin/fancontrol "sda,sdb,sdc,sdd" 0 37
 Restart=on-failure
 
 [Install]
-WantedBy=multi-user.target 
+WantedBy=multi-user.target
