@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: compile-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: gcc-container
+        image: gcc
+        command: ["sh", "-c", "gcc -o fancontrol fancontrol.cpp"]
+        volumeMounts:
+        - name: myapp-volume
+          mountPath: /usr/src/myapp
+        workingDir: /usr/src/myapp
+      restartPolicy: Never
+      volumes:
+      - name: myapp-volume
+        hostPath:
+          path: "/home/admin/terramaster-fancontrol"
+  backoffLimit: 0
