@@ -29,7 +29,10 @@ You can verify which chip you have using ``sensors-detect``.
 
 This will run it in debug mode (1) with temperature setpoint= 37c. Make sure run with fancontrol with sudo.
 
-4. Alternatively you can use the included systemd service. Make sure you also add the list of drives there. Copy it to `/etc/systemd/system`. Also, copy the binary to `/usr/local/bin/fancontrol`.
+4. Alternatively you can use the included systemd service.
+Change the location of the fancontrol application.
+Make sure you also add the list of drives there.
+Copy it to `/etc/systemd/system`.
 
 ```
 sudo systemctl start fancontrol.service
