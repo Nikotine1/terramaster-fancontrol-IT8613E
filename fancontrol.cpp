@@ -103,7 +103,7 @@ int split_drive_names(const char *drive_list, char ***drives)
 void print_usage() {
     printf("Usage:\n"
            "\n"
-           " fancontrol --drive_list <drive_list> [--debug] [--setpoint] [--pwminit] [--interval] [--overheat] [--pwmmin] [--kp] [--ki] [--imax] [--kd]\n"
+           " fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>]\n"
            "\n"
            "drive_list A comma-separated list of drive names between quotes e.g. 'sda,sdc' (required)\n"
            "debug     Enable (1) or disable (0) debug logs (default: 0)\n"
@@ -131,27 +131,27 @@ int main(int argc, char *argv[])
     const char *drive_list = NULL;
 
     for (int i = 1; i < argc; ++i) {
-        if (strncmp(argv[i], "--drive_list", 13) == 0) {
+        if (strncmp(argv[i], "--drive_list=", 13) == 0) {
             drive_list = argv[i] + 13;
-        } else if (strncmp(argv[i], "--debug", 8) == 0) {
+        } else if (strncmp(argv[i], "--debug=", 8) == 0) {
             debug = atoi(argv[i] + 8);
-        } else if (strncmp(argv[i], "--setpoint", 11) == 0) {
+        } else if (strncmp(argv[i], "--setpoint=", 11) == 0) {
             setpoint = atoi(argv[i] + 11);
-        } else if (strncmp(argv[i], "--pwminit", 10) == 0) {
+        } else if (strncmp(argv[i], "--pwminit=", 10) == 0) {
             pwminit = atoi(argv[i] + 10);
-        } else if (strncmp(argv[i], "--interval", 11) == 0) {
+        } else if (strncmp(argv[i], "--interval=", 11) == 0) {
             interval = atoi(argv[i] + 11);
-        } else if (strncmp(argv[i], "--overheat", 11) == 0) {
+        } else if (strncmp(argv[i], "--overheat=", 11) == 0) {
             overheat = atoi(argv[i] + 11);
-        } else if (strncmp(argv[i], "--pwmmin", 9) == 0) {
+        } else if (strncmp(argv[i], "--pwmmin=", 9) == 0) {
             pwmmin = atoi(argv[i] + 9);
-        } else if (strncmp(argv[i], "--kp", 5) == 0) {
+        } else if (strncmp(argv[i], "--kp=", 5) == 0) {
             kp = atof(argv[i] + 5);
-        } else if (strncmp(argv[i], "--ki", 5) == 0) {
+        } else if (strncmp(argv[i], "--ki=", 5) == 0) {
             ki = atof(argv[i] + 5);
-        } else if (strncmp(argv[i], "--imax", 7) == 0) {
+        } else if (strncmp(argv[i], "--imax=", 7) == 0) {
             imax = atof(argv[i] + 7);
-        } else if (strncmp(argv[i], "--kd", 5) == 0) {
+        } else if (strncmp(argv[i], "--kd=", 5) == 0) {
             kd = atof(argv[i] + 5);
         } else {
             printf("Unknown parameter: %s\n", argv[i]);
