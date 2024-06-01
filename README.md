@@ -9,6 +9,9 @@ These changes are based on this post: https://xpenology.com/forum/topic/14007-te
 
 You can verify which chip you have using ``sensors-detect``.
 
+It also no longer uses the creation of files in ``/opt/disks``, named after the disks you want to monitor.
+Instead, you give it a list of drive names as an argument.
+
 ## Installation:
 1. Clone the repo
 ``git clone https://github.com/Nikotine1/terramaster-fancontrol-IT8613E``
