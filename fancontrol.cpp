@@ -26,11 +26,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/io.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <arpa/inet.h>
 
 // These defaults can be overridden at the CLI
 static bool debug = false; // Turn on/off logging
@@ -43,11 +45,12 @@ static double kp = 1.0;
 static double ki = 0.0;
 static double imax = 10.0;
 static double kd = 0.0;
-
 const static int pwmmax = 255; // Max PWM value, do not change
 const static uint8_t port = 0x2e;
 const static uint8_t fanspeed = 200;
 static uint16_t ecbar = 0x00;
+static char *graphite_server = NULL;
+static int graphite_port = 0;
 
 void iowrite(uint8_t reg, uint8_t val)
 {
@@ -103,21 +106,55 @@ int split_drive_names(const char *drive_list, char ***drives)
 void print_usage() {
     printf("Usage:\n"
            "\n"
-           " fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>]\n"
+           " fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]\n"
            "\n"
-           "drive_list A comma-separated list of drive names between quotes e.g. 'sda,sdc' (required)\n"
-           "debug     Enable (1) or disable (0) debug logs (default: 0)\n"
-           "setpoint  Target maximum hard drive operating temperature in\n"
-           "          degrees Celsius (default: 37)\n"
-           "pwminit   Initial PWM value to write (default: 128)\n"
-           "interval  How often we poll for temperatures in seconds (default: 10)\n"
-           "overheat  Overheat temperature threshold in degrees Celsius above \n"
-           "          which we drive the fans at maximum speed (default: 50)\n"
-           "pwmmin    Never drive the fans below this PWM value (default: 80)\n"
-           "kp        Proportional coefficient (default: 1.0)\n"
-           "ki        Integral coefficient (default: 0.0)\n"
-           "imax      Maximum integral value (default: 10.0)\n"
-           "kd        Derivative coefficient (default: 0.0)\n");
+           "drive_list        A comma-separated list of drive names between quotes e.g. 'sda,sdc' (required)\n"
+           "debug             Enable (1) or disable (0) debug logs (default: 0)\n"
+           "setpoint          Target maximum hard drive operating temperature in\n"
+           "                  degrees Celsius (default: 37)\n"
+           "pwminit           Initial PWM value to write (default: 128)\n"
+           "interval          How often we poll for temperatures in seconds (default: 10)\n"
+           "overheat          Overheat temperature threshold in degrees Celsius above \n"
+           "                  which we drive the fans at maximum speed (default: 50)\n"
+           "pwmmin            Never drive the fans below this PWM value (default: 80)\n"
+           "kp                Proportional coefficient (default: 1.0)\n"
+           "ki                Integral coefficient (default: 0.0)\n"
+           "imax              Maximum integral value (default: 10.0)\n"
+           "kd                Derivative coefficient (default: 0.0)\n"
+           "graphite_server   Graphite server IP address and port in the format <ip:port> (optional)\n");
+}
+
+void send_to_graphite(const char *server, int port, const char *message) {
+    int sockfd;
+    struct sockaddr_in servaddr;
+
+    // Create socket
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        printf("Error: Could not create socket\n");
+        return;
+    }
+
+    memset(&servaddr, 0, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(port);
+
+    // Convert IPv4 and IPv6 addresses from text to binary form
+    if (inet_pton(AF_INET, server, &servaddr.sin_addr) <= 0) {
+        printf("Invalid address/ Address not supported \n");
+        return;
+    }
+
+    // Connect to Graphite server
+    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+        printf("Connection Failed \n");
+        return;
+    }
+
+    // Send the message
+    send(sockfd, message, strlen(message), 0);
+
+    // Close the socket
+    close(sockfd);
 }
 
 int main(int argc, char *argv[])
@@ -153,6 +190,17 @@ int main(int argc, char *argv[])
             imax = atof(argv[i] + 7);
         } else if (strncmp(argv[i], "--kd=", 5) == 0) {
             kd = atof(argv[i] + 5);
+        } else if (strncmp(argv[i], "--graphite_server=", 18) == 0) {
+            char *server_info = argv[i] + 18;
+            char *colon_pos = strchr(server_info, ':');
+            if (colon_pos) {
+                *colon_pos = '\0';
+                graphite_server = server_info;
+                graphite_port = atoi(colon_pos + 1);
+            } else {
+                printf("Invalid Graphite server format. Expected <ip:port>\n");
+                return 1;
+            }
         } else {
             printf("Unknown parameter: %s\n", argv[i]);
             print_usage();
@@ -304,6 +352,13 @@ int main(int argc, char *argv[])
         // Write new PWM
         ecwrite(0x6b, pwm);
         ecwrite(0x73, pwm);
+
+        // Send PWM value to Graphite if configured
+        if (graphite_server) {
+            char message[256];
+            snprintf(message, sizeof(message), "fancontrol.pwm %d %ld\n", pwm, time(NULL));
+            send_to_graphite(graphite_server, graphite_port, message);
+        }
 
     endloop:
         sleep(interval);
