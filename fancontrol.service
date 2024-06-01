@@ -2,7 +2,7 @@
 Description=Fancontrol
 
 [Service]
-ExecStart=/home/admin/terramaster-fancontrol/fancontrol "sda,sdb,sdc,sdd" 1 37
+ExecStart=/home/admin/terramaster-fancontrol/fancontrol --drive_list="sda,sdb,sdc,sdd" --debug=1 --kp=2.0
 Restart=on-failure
 
 [Install]
