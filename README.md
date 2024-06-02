@@ -16,21 +16,26 @@ Instead, you give it a list of drive names as an argument.
 1. Clone the repo
 ``git clone https://github.com/Nikotine1/terramaster-fancontrol-IT8613E``
 
-2. Build with GCC. I'm using the docker image for ease of use.
+2. Build with GCC.
+
+   Using Docker:
 
    - Pull the image:
 
 ``docker pull gcc``
 
-   - Compile fancontrol.cpp (you must be in the same directory)
+   - Compile fancontrol.cpp.
 
 ``docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp gcc gcc -o fancontrol fancontrol.cpp``
 
-3. Run the compiled program (command descriptions in the author's thread).
+   Using Kubernetes:
+   See https://www.niek.be/2024/06/02/compiling-c-with-gcc-in-kubernetes-container
 
-``sudo ./fancontrol "sda,sdb,sdc,sdd" 1 37 ``
+3. Run the compiled program.
 
-This will run it in debug mode (1) with temperature setpoint= 37c. Make sure run with fancontrol with sudo.
+``sudo ./fancontrol --drive_list="sda,sdb,sdc,sdd" --debug=1 --setpoint=37``
+
+This will run it in debug mode (1), monitoring drives /dev/sda to d, with temperature setpoint 37°C. Make sure to run with sudo.
 
 4. Alternatively you can use the included systemd service.
 Change the location of the fancontrol application.
