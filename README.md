@@ -12,6 +12,9 @@ You can verify which chip you have using ``sensors-detect``.
 It also no longer uses the creation of files in ``/opt/disks``, named after the disks you want to monitor.
 Instead, you give it a list of drive names as an argument.
 
+I have also added reporting to a Graphite server.
+Enable it by adding ``--graphite_server=<ip address>:<port>``.
+
 ## Installation:
 1. Clone the repo
 ``git clone https://github.com/Nikotine1/terramaster-fancontrol-IT8613E``
