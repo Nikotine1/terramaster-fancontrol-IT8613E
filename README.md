@@ -48,7 +48,7 @@ sudo systemctl enable fancontrol.service
 ```
 
 ## Parameters:
-
+```
  fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]
 
 drive_list        A comma-separated list of drive names between quotes e.g. 'sda,sdc' (required)
@@ -65,3 +65,4 @@ ki                Integral coefficient (default: 0.0)
 imax              Maximum integral value (default: 10.0)
 kd                Derivative coefficient (default: 0.0)
 graphite_server   Graphite server IP address and port in the format <ip:port> (optional)
+```
