@@ -46,3 +46,22 @@ Copy it to `/etc/systemd/system`.
 sudo systemctl start fancontrol.service
 sudo systemctl enable fancontrol.service
 ```
+
+## Parameters:
+
+ fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]
+
+drive_list        A comma-separated list of drive names between quotes e.g. 'sda,sdc' (required)
+debug             Enable (1) or disable (0) debug logs (default: 0)
+setpoint          Target maximum hard drive operating temperature in
+                  degrees Celsius (default: 37)
+pwminit           Initial PWM value to write (default: 128)
+interval          How often we poll for temperatures in seconds (default: 10)
+overheat          Overheat temperature threshold in degrees Celsius above
+                  which we drive the fans at maximum speed (default: 50)
+pwmmin            Never drive the fans below this PWM value (default: 80)
+kp                Proportional coefficient (default: 1.0)
+ki                Integral coefficient (default: 0.0)
+imax              Maximum integral value (default: 10.0)
+kd                Derivative coefficient (default: 0.0)
+graphite_server   Graphite server IP address and port in the format <ip:port> (optional)
