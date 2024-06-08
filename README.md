@@ -13,7 +13,11 @@ It also no longer uses the creation of files in ``/opt/disks``, named after the 
 Instead, you give it a list of drive names as an argument.
 
 I have also added reporting to a Graphite server.
-Enable it by adding ``--graphite_server=<ip address>:<port>``.
+Enable it by adding ``--graphite_server=<ip address>:<port>``.  
+This allows you to monitor the fan speed in Grafana:
+  
+<img width="883" alt="image" src="https://github.com/Nikotine1/terramaster-fancontrol-IT8613E/assets/1538384/a89e8c9d-1ada-490a-b380-9101bc4fa552">
+
 
 ## Installation:
 1. Clone the repo
