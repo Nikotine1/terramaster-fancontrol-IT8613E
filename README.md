@@ -18,42 +18,42 @@ This allows you to monitor the fan speed in Grafana:
   
 <img width="883" alt="image" src="https://github.com/Nikotine1/terramaster-fancontrol-IT8613E/assets/1538384/a89e8c9d-1ada-490a-b380-9101bc4fa552">
 
-
 ## Installation:
 1. Clone the repo
-``git clone https://github.com/Nikotine1/terramaster-fancontrol-IT8613E``
+   ```
+   git clone https://github.com/Nikotine1/terramaster-fancontrol-IT8613E
+   ```
 
 2. Build with GCC.
 
    Using Docker:
-
    - Pull the image:
-
-``docker pull gcc``
-
-   - Compile fancontrol.cpp.
-
-``docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp gcc gcc -o fancontrol fancontrol.cpp``
+     ```
+     docker pull gcc
+     ```
+   - Compile fancontrol.cpp:
+     ```
+     docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp gcc gcc -o fancontrol fancontrol.cpp
+     ```
 
    Using Kubernetes:
-   See https://www.niek.be/2024/06/02/compiling-c-with-gcc-in-kubernetes-container
+   - See [this guide](https://www.niek.be/2024/06/02/compiling-c-with-gcc-in-kubernetes-container)
 
 3. Run the compiled program.
+   ```
+   sudo ./fancontrol --drive_list="sda,sdb,sdc,sdd" --debug=1 --setpoint=37
+   ```
+   This will run it in debug mode (1), monitoring drives /dev/sda to d, with temperature setpoint 37°C. Make sure to run with sudo.
 
-``sudo ./fancontrol --drive_list="sda,sdb,sdc,sdd" --debug=1 --setpoint=37``
-
-This will run it in debug mode (1), monitoring drives /dev/sda to d, with temperature setpoint 37°C. Make sure to run with sudo.
-
-4. Alternatively you can use the included systemd service.
-Change the location of the fancontrol application.
-Make sure you also add the list of drives there.
-Copy it to `/etc/systemd/system`.
-
-```
-sudo systemctl start fancontrol.service
-sudo systemctl enable fancontrol.service
-```
-
+4. Alternatively, you can use the included systemd service.
+   - Change the location of the fancontrol application.
+   - Make sure you also add the list of drives there.
+   - Copy it to `/etc/systemd/system`:
+     ```
+     sudo systemctl start fancontrol.service
+     sudo systemctl enable fancontrol.service
+     ```
+     
 ## Parameters:
 ```
  fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]
