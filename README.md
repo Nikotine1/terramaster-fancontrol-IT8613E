@@ -1,6 +1,6 @@
 # Fan control for TerraMaster on Linux
 
-Tested with F4-424 Pro. This a direct port of the Xpenology fancontrol script by Eudean to work on OMV/Debian.
+Tested with F4-424 Pro. This is a direct port of the Xpenology fancontrol script by Eudean to work on OMV/Debian.
 
 Original author: https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-control/?ct=1559481439
 
@@ -13,9 +13,9 @@ It also no longer uses the creation of files in ``/opt/disks``, named after the 
 Instead, you give it a list of drive names as an argument.
 
 I have also added reporting to a Graphite server.
-Enable it by adding ``--graphite_server=<ip address>:<port>``.  
+Enable it by adding ``--graphite_server=<ip address>:<port>``.
 This allows you to monitor the fan speed in Grafana:
-  
+
 <img width="883" alt="image" src="https://github.com/Nikotine1/terramaster-fancontrol-IT8613E/assets/1538384/a89e8c9d-1ada-490a-b380-9101bc4fa552">
 
 ## Installation:
@@ -53,12 +53,13 @@ This allows you to monitor the fan speed in Grafana:
      sudo systemctl start fancontrol.service
      sudo systemctl enable fancontrol.service
      ```
-     
+
 ## Parameters:
 ```
- fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]
+ fancontrol --drive_list=<drive_list> [--chip=1|2] [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]
 
 drive_list        A comma-separated list of drive names between quotes e.g. 'sda,sdc' (required)
+chip              Temperature sensor: 1=IT8772E or 2=IT8613E (default: 2)
 debug             Enable (1) or disable (0) debug logs (default: 0)
 setpoint          Target maximum hard drive operating temperature in
                   degrees Celsius (default: 37)
@@ -67,7 +68,7 @@ interval          How often we poll for temperatures in seconds (default: 10)
 overheat          Overheat temperature threshold in degrees Celsius above
                   which we drive the fans at maximum speed (default: 50)
 pwmmin            Never drive the fans below this PWM value (default: 80)
-kp                Proportional coefficient (default: 1.0)
+kp                Proportional coefficient (default: 0.3)
 ki                Integral coefficient (default: 0.0)
 imax              Maximum integral value (default: 10.0)
 kd                Derivative coefficient (default: 0.0)

@@ -35,13 +35,14 @@
 #include <arpa/inet.h>
 
 // These defaults can be overridden at the CLI
+static int chip = 2;       // 1=IT8772E or 2=IT8613E
 static bool debug = false; // Turn on/off logging
 static int setpoint = 37;  // Default target hard drive operating temperature
 static int pwminit = 128;  // Initial PWM value (50%)
 static int interval = 10;  // How often we poll for temperatures
 static int overheat = 50;  // Overheat limit where we drive the fans to 100%
 static int pwmmin = 80;    // Never drive the fans below this PWM value (30%)
-static double kp = 1.0;
+static double kp = 0.3;
 static double ki = 0.0;
 static double imax = 10.0;
 static double kd = 0.0;
@@ -106,9 +107,10 @@ int split_drive_names(const char *drive_list, char ***drives)
 void print_usage() {
     printf("Usage:\n"
            "\n"
-           " fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]\n"
+           " fancontrol --drive_list=<drive_list> [--chip=1|2] [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]\n"
            "\n"
            "drive_list        A comma-separated list of drive names between quotes e.g. 'sda,sdc' (required)\n"
+           "chip              Temperature sensor: 1=IT8772E or 2=IT8613E (default: 2)\n"
            "debug             Enable (1) or disable (0) debug logs (default: 0)\n"
            "setpoint          Target maximum hard drive operating temperature in\n"
            "                  degrees Celsius (default: 37)\n"
@@ -117,7 +119,7 @@ void print_usage() {
            "overheat          Overheat temperature threshold in degrees Celsius above \n"
            "                  which we drive the fans at maximum speed (default: 50)\n"
            "pwmmin            Never drive the fans below this PWM value (default: 80)\n"
-           "kp                Proportional coefficient (default: 1.0)\n"
+           "kp                Proportional coefficient (default: 0.3)\n"
            "ki                Integral coefficient (default: 0.0)\n"
            "imax              Maximum integral value (default: 10.0)\n"
            "kd                Derivative coefficient (default: 0.0)\n"
@@ -170,6 +172,8 @@ int main(int argc, char *argv[])
     for (int i = 1; i < argc; ++i) {
         if (strncmp(argv[i], "--drive_list=", 13) == 0) {
             drive_list = argv[i] + 13;
+        } else if (strncmp(argv[i], "--chip=", 7) == 0) {
+            chip = atoi(argv[i] + 7);
         } else if (strncmp(argv[i], "--debug=", 8) == 0) {
             debug = atoi(argv[i] + 8);
         } else if (strncmp(argv[i], "--setpoint=", 11) == 0) {
@@ -232,9 +236,20 @@ int main(int argc, char *argv[])
     outb(0x55, port);
     outb(0x55, port);
 
-    // Sanity check that this is the IT8613E
-    assert(ioread(0x20) == 0x86);
-    assert(ioread(0x21) == 0x13);
+    if (chip == 1) {
+        // Sanity check that this is the IT8772E
+        assert(ioread(0x20) == 0x87);
+        assert(ioread(0x21) == 0x72);
+        printf("IT8772E found!")
+    } else if (chip == 2) {
+        // Sanity check that this is the IT8613E
+        assert(ioread(0x20) == 0x86);
+        assert(ioread(0x21) == 0x13);
+        printf("IT8613E found!")
+    } else {
+        printf("Error: Invalid chip number. Expected 1 or 2.\n");
+        return 2;
+    }
 
     // Set LDN = 4 to access environment registers
     iowrite(0x07, 0x04);
