@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
         printf("IT8613E found!")
     } else {
         printf("Error: Invalid chip number. Expected 1 or 2.\n");
-        return 2;
+        return 1;
     }
 
     // Set LDN = 4 to access environment registers
