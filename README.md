@@ -4,15 +4,13 @@ Tested with F4-424 Pro. This is a direct port of the Xpenology fancontrol script
 
 Original author: https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-control/?ct=1559481439
 
-This fork implements changes for it to work with NAS devices containing the IT8613E chipset, instead of the original IT8772E.
-These changes are based on this post: https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-control/?do=findComment&comment=264172
+This fork implements changes for it to work with NAS devices containing the IT8613E chipset, while the original program only supported IT8772E (used in the F4-220).
+Initially I made the changes described in [this post](https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-control/?do=findComment&comment=264172), but in the end I just commented out the part that was specific for the IT8772E.
 
-You can verify which chip you have using ``sensors-detect``.
-
-It also no longer uses the creation of files in ``/opt/disks``, named after the disks you want to monitor.
+Further improvements are:
+1. It no longer uses the creation of files in ``/opt/disks``, named after the disks you want to monitor.
 Instead, you give it a list of drive names as an argument.
-
-I have also added reporting to a Graphite server.
+2. I have also added reporting to a Graphite server.
 Enable it by adding ``--graphite_server=<ip address>:<port>``.
 This allows you to monitor the fan speed in Grafana:
 
