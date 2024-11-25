@@ -67,7 +67,7 @@ interval          How often we poll for temperatures in seconds (default: 10)
 overheat          Overheat temperature threshold in degrees Celsius above
                   which we drive the fans at maximum speed (default: 50)
 pwmmin            Never drive the fans below this PWM value (default: 80)
-kp                Proportional coefficient (default: 0.3)
+kp                Proportional coefficient (default: 0.1)
 ki                Integral coefficient (default: 0.0)
 imax              Maximum integral value (default: 10.0)
 kd                Derivative coefficient (default: 0.0)

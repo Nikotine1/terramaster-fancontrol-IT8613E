@@ -41,7 +41,7 @@ static int pwminit = 128;  // Initial PWM value (50%)
 static int interval = 10;  // How often we poll for temperatures
 static int overheat = 50;  // Overheat limit where we drive the fans to 100%
 static int pwmmin = 80;    // Never drive the fans below this PWM value (30%)
-static double kp = 0.3;
+static double kp = 0.1;
 static double ki = 0.0;
 static double imax = 10.0;
 static double kd = 0.0;
@@ -117,7 +117,7 @@ void print_usage() {
            "overheat          Overheat temperature threshold in degrees Celsius above \n"
            "                  which we drive the fans at maximum speed (default: 50)\n"
            "pwmmin            Never drive the fans below this PWM value (default: 80)\n"
-           "kp                Proportional coefficient (default: 0.3)\n"
+           "kp                Proportional coefficient (default: 0.1)\n"
            "ki                Integral coefficient (default: 0.0)\n"
            "imax              Maximum integral value (default: 10.0)\n"
            "kd                Derivative coefficient (default: 0.0)\n"
