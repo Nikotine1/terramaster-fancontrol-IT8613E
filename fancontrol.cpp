@@ -35,7 +35,6 @@
 #include <arpa/inet.h>
 
 // These defaults can be overridden at the CLI
-static int chip = 2;       // 1=IT8772E or 2=IT8613E
 static bool debug = false; // Turn on/off logging
 static int setpoint = 37;  // Default target hard drive operating temperature
 static int pwminit = 128;  // Initial PWM value (50%)
@@ -107,10 +106,9 @@ int split_drive_names(const char *drive_list, char ***drives)
 void print_usage() {
     printf("Usage:\n"
            "\n"
-           " fancontrol --drive_list=<drive_list> [--chip=1|2] [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]\n"
+           " fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]\n"
            "\n"
            "drive_list        A comma-separated list of drive names between quotes e.g. 'sda,sdc' (required)\n"
-           "chip              Temperature sensor: 1=IT8772E or 2=IT8613E (default: 2)\n"
            "debug             Enable (1) or disable (0) debug logs (default: 0)\n"
            "setpoint          Target maximum hard drive operating temperature in\n"
            "                  degrees Celsius (default: 37)\n"
@@ -172,8 +170,6 @@ int main(int argc, char *argv[])
     for (int i = 1; i < argc; ++i) {
         if (strncmp(argv[i], "--drive_list=", 13) == 0) {
             drive_list = argv[i] + 13;
-        } else if (strncmp(argv[i], "--chip=", 7) == 0) {
-            chip = atoi(argv[i] + 7);
         } else if (strncmp(argv[i], "--debug=", 8) == 0) {
             debug = atoi(argv[i] + 8);
         } else if (strncmp(argv[i], "--setpoint=", 11) == 0) {
@@ -236,20 +232,14 @@ int main(int argc, char *argv[])
     outb(0x55, port);
     outb(0x55, port);
 
-    if (chip == 1) {
-        // Sanity check that this is the IT8772E
-        assert(ioread(0x20) == 0x87);
-        assert(ioread(0x21) == 0x72);
-        printf("IT8772E found!")
-    } else if (chip == 2) {
-        // Sanity check that this is the IT8613E
-        assert(ioread(0x20) == 0x86);
-        assert(ioread(0x21) == 0x13);
-        printf("IT8613E found!")
-    } else {
-        printf("Error: Invalid chip number. Expected 1 or 2.\n");
-        return 1;
-    }
+    // Sanity checks commented out so that it works for both chips.
+    // Sanity check that this is the IT8772E
+    //assert(ioread(0x20) == 0x87);
+    //assert(ioread(0x21) == 0x72);
+
+    // Sanity check that this is the IT8613E
+    //assert(ioread(0x20) == 0x86);
+    //assert(ioread(0x21) == 0x13);
 
     // Set LDN = 4 to access environment registers
     iowrite(0x07, 0x04);

@@ -56,10 +56,9 @@ This allows you to monitor the fan speed in Grafana:
 
 ## Parameters:
 ```
- fancontrol --drive_list=<drive_list> [--chip=1|2] [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]
+ fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]
 
 drive_list        A comma-separated list of drive names between quotes e.g. 'sda,sdc' (required)
-chip              Temperature sensor: 1=IT8772E or 2=IT8613E (default: 2)
 debug             Enable (1) or disable (0) debug logs (default: 0)
 setpoint          Target maximum hard drive operating temperature in
                   degrees Celsius (default: 37)
