@@ -17,6 +17,8 @@ This allows you to monitor the fan speed in Grafana:
 <img width="883" alt="image" src="https://github.com/Nikotine1/terramaster-fancontrol-IT8613E/assets/1538384/a89e8c9d-1ada-490a-b380-9101bc4fa552">
 
 ## Installation:
+Warning: As from Truenas 24.10.1, [the home folder is no longer executable](https://forums.truenas.com/t/shell-script-permission-denied-with-24-10-1/27941). Instead, use the data pool for your scripts.
+
 1. Clone the repo
    ```
    git clone https://github.com/Nikotine1/terramaster-fancontrol-IT8613E
@@ -51,6 +53,7 @@ This allows you to monitor the fan speed in Grafana:
      sudo systemctl start fancontrol.service
      sudo systemctl enable fancontrol.service
      ```
+   - You will have to reinstall the service after every Truenas update. I use a shell script to do this.
 
 ## Parameters:
 ```
