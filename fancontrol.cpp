@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
         }
 
         // Get CPU temperature
-        FILE *cpupipe = popen("sensors | grep -i 'Package id' | awk -F'\\+|\\.' '{print $2}'", "r");
+        FILE *cpupipe = popen("sensors | grep -i "Package id" | awk -F'[+.°]' '{print $2}'", "r");
         if (cpupipe)
         {
             char cputempstring[10];
