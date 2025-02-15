@@ -305,6 +305,28 @@ int main(int argc, char *argv[])
             }
         }
 
+        // Get CPU temperature
+        FILE *cpupipe = popen("sensors | grep -i 'Package id' | awk -F'\\+|\\.' '{print $2}'", "r");
+        if (cpupipe)
+        {
+            char cputempstring[10];
+            fgets(cputempstring, sizeof(cputempstring), cpupipe);
+            pclose(cpupipe);
+            int cputemp = atoi(cputempstring);
+
+            if (cputemp > maxtemp)
+            {
+                maxtemp = cputemp;
+            }
+
+            if (debug)
+            {
+                printf("CPU Temperature: %d\n", cputemp);
+            }
+        }
+
+        if (debug) printf("Max Temperature: %d\n", maxtemp);
+
         // Calculate time since last poll
         clock_gettime(CLOCK_MONOTONIC, &curtime);
         timediff = ((1000000000 * (curtime.tv_sec - lasttime.tv_sec) +

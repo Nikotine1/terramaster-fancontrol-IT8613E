@@ -2,7 +2,7 @@
 Description=Fancontrol
 
 [Service]
-ExecStart=/home/admin/terramaster-fancontrol/fancontrol --drive_list="sda,sdb,sdc,sdd" --setpoint=37 --debug=1 --kp=0.3 --graphite_server=x.x.x.x:2003
+ExecStart=/mnt/ssd/storage/terramaster-fancontrol/fancontrol --drive_list="sda,sdb,sdc,sdd" --setpoint=37 --debug=1 --kp=0.1 --graphite_server=10.25.9.5:2003
 Restart=on-failure
 
 [Install]
