@@ -18,5 +18,5 @@ spec:
       volumes:
       - name: myapp-volume
         hostPath:
-          path: "/home/admin/terramaster-fancontrol"
+          path: "/home/admin/home/terramaster-fancontrol"
   backoffLimit: 0
