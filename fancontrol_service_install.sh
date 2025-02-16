@@ -28,7 +28,16 @@ else
     exit 1
 fi
 
-# Step 3: Start the service
+# Step 3: Stop the service
+echo "Stopping fancontrol.service..."
+if systemctl stop fancontrol.service; then
+    echo "fancontrol.service stopped successfully."
+else
+    echo "Failed to stop fancontrol.service. Exiting."
+    exit 1
+fi
+
+# Step 4: Start the service
 echo "Starting fancontrol.service..."
 if systemctl start fancontrol.service; then
     echo "fancontrol.service started successfully."
@@ -37,7 +46,7 @@ else
     exit 1
 fi
 
-# Step 4: Enable the service
+# Step 5: Enable the service
 echo "Enabling fancontrol.service..."
 if systemctl enable fancontrol.service; then
     echo "fancontrol.service enabled successfully."
@@ -46,7 +55,7 @@ else
     exit 1
 fi
 
-# Step 5: Display the service status
+# Step 6: Display the service status
 echo "Checking status of fancontrol.service..."
 systemctl status fancontrol.service
 
