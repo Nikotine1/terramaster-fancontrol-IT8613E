@@ -74,5 +74,6 @@ kp                Proportional coefficient (default: 0.1)
 ki                Integral coefficient (default: 0.0)
 imax              Maximum integral value (default: 10.0)
 kd                Derivative coefficient (default: 0.0)
+cpu_avg           Number of CPU temperature measurements for rolling average (default: 10)
 graphite_server   Graphite server IP address and port in the format <ip:port> (optional)
 ```
