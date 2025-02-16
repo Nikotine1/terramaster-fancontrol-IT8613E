@@ -418,7 +418,7 @@ int main(int argc, char *argv[])
             send_to_graphite(graphite_server, graphite_port, message);
 
             // Send CPU average temperature
-            snprintf(message_temp, sizeof(message_temp), "fancontrol.cpu_avg_temp %d %ld\n", avg_temp, time(NULL));
+            snprintf(message_temp, sizeof(message_temp), "fancontrol.cpu_avg_temp %d %ld\n", cpu_avg_temp, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message_temp);
         }
 
