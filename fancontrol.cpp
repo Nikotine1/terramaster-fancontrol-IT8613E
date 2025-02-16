@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
     struct timespec curtime;
     struct timespec lasttime;
 
-    int cputemp_values[cpu_avg] = {0};  // Store last 10 values
+    int cputemp_values[cputemp_max_values] = {0};  // Store last 10 values
     int cputemp_index = 0;  // Circular index
     int cputemp_count = 0;  // Number of values stored
     int cputemp_sum = 0;    // Sum of stored values
