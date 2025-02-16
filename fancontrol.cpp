@@ -339,7 +339,7 @@ int main(int argc, char *argv[])
             cputemp_index = (cputemp_index + 1) % cputemp_max_values;
 
             // Compute rolling average
-            int cpu_avg_temp = sum / count;
+            int cpu_avg_temp = cputemp_sum / cputemp_count;
 
             if (cpu_avg_temp > maxtemp)
             {
