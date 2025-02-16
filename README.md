@@ -38,6 +38,7 @@ Warning: As from Truenas 24.10.1, [the home folder is no longer executable](http
 
    Using Kubernetes:
    - See [this guide](https://www.niek.be/2024/06/02/compiling-c-with-gcc-in-kubernetes-container)
+   Note: Truenas Scale 24.10 moved away from Kubernetes in favour of docker ([changelog](https://www.truenas.com/docs/scale/24.10/gettingstarted/scalereleasenotes/)), so just use the commands above.
 
 3. Run the compiled program.
    ```
