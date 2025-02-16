@@ -51,6 +51,7 @@ const static uint8_t fanspeed = 200;
 static uint16_t ecbar = 0x00;
 static char *graphite_server = NULL;
 static int graphite_port = 0;
+static int cputemp_max_values = 10; // Number of values for rolling average of cpu temperature
 
 void iowrite(uint8_t reg, uint8_t val)
 {
@@ -106,7 +107,7 @@ int split_drive_names(const char *drive_list, char ***drives)
 void print_usage() {
     printf("Usage:\n"
            "\n"
-           " fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]\n"
+           " fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--cpu_avg=<value>] [--graphite_server=<ip:port>]\n"
            "\n"
            "drive_list        A comma-separated list of drive names between quotes e.g. 'sda,sdc' (required)\n"
            "debug             Enable (1) or disable (0) debug logs (default: 0)\n"
@@ -121,6 +122,7 @@ void print_usage() {
            "ki                Integral coefficient (default: 0.0)\n"
            "imax              Maximum integral value (default: 10.0)\n"
            "kd                Derivative coefficient (default: 0.0)\n"
+           "cpu_avg           Number of CPU temperature measurements for rolling average (default: 10)\n"
            "graphite_server   Graphite server IP address and port in the format <ip:port> (optional)\n");
 }
 
@@ -190,6 +192,8 @@ int main(int argc, char *argv[])
             imax = atof(argv[i] + 7);
         } else if (strncmp(argv[i], "--kd=", 5) == 0) {
             kd = atof(argv[i] + 5);
+        } else if (strncmp(argv[i], "--cpu_avg=", 10) == 0) {
+            cputemp_max_values = atof(argv[i] + 10);
         } else if (strncmp(argv[i], "--graphite_server=", 18) == 0) {
             char *server_info = argv[i] + 18;
             char *colon_pos = strchr(server_info, ':');
@@ -270,6 +274,11 @@ int main(int argc, char *argv[])
     double pwmtemp = pwm;
     struct timespec curtime;
     struct timespec lasttime;
+
+    int cputemp_values[cpu_avg] = {0};  // Store last 10 values
+    int cputemp_index = 0;  // Circular index
+    int cputemp_count = 0;  // Number of values stored
+    int cputemp_sum = 0;    // Sum of stored values
 
     clock_gettime(CLOCK_MONOTONIC, &lasttime);
 
