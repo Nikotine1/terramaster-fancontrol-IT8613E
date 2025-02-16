@@ -323,14 +323,32 @@ int main(int argc, char *argv[])
             pclose(cpupipe);
             int cputemp = atoi(cputempstring);
 
-            if (cputemp > maxtemp)
+            // Rolling average logic
+            if (cputemp_count < cputemp_max_values) {
+                // If not full, just add value
+                cputemp_sum += cputemp;
+                cputemp_values[cputemp_count] = cputemp;
+                cputemp_count++;
+            } else {
+                // If full, replace oldest value
+                cputemp_sum = cputemp_sum - cputemp_values[cputemp_index] + cputemp;
+                cputemp_values[cputemp_index] = cputemp;
+            }
+
+            // Update circular index
+            cputemp_index = (cputemp_index + 1) % cputemp_max_values;
+
+            // Compute rolling average
+            int cpu_avg_temp = sum / count;
+
+            if (cpu_avg_temp > maxtemp)
             {
-                maxtemp = cputemp;
+                maxtemp = cpu_avg_temp;
             }
 
             if (debug)
             {
-                printf("CPU Temperature: %d\n", cputemp);
+                printf("Current CPU Temperature: %d°C | Rolling Avg (last %d): %d°C\n", cputemp, cputemp_count, cpu_avg_temp);
             }
         }
 
