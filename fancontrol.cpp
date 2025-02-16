@@ -279,6 +279,7 @@ int main(int argc, char *argv[])
     int cputemp_index = 0;  // Circular index
     int cputemp_count = 0;  // Number of values stored
     int cputemp_sum = 0;    // Sum of stored values
+    int cpu_avg_temp = 0; // Average CPU temperature
 
     clock_gettime(CLOCK_MONOTONIC, &lasttime);
 
@@ -339,7 +340,7 @@ int main(int argc, char *argv[])
             cputemp_index = (cputemp_index + 1) % cputemp_max_values;
 
             // Compute rolling average
-            int cpu_avg_temp = cputemp_sum / cputemp_count;
+            cpu_avg_temp = cputemp_sum / cputemp_count;
 
             if (cpu_avg_temp - 20 > maxtemp) // Allow for 20 degrees higher temperature than the drives
             {
@@ -410,8 +411,15 @@ int main(int argc, char *argv[])
         // Send PWM value to Graphite if configured
         if (graphite_server) {
             char message[256];
+            char message_temp[256];
+
+            // Send PWM value
             snprintf(message, sizeof(message), "fancontrol.pwm %d %ld\n", pwm, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
+
+            // Send CPU average temperature
+            snprintf(message_temp, sizeof(message_temp), "fancontrol.cpu_avg_temp %d %ld\n", avg_temp, time(NULL));
+            send_to_graphite(graphite_server, graphite_port, message_temp);
         }
 
     endloop:
