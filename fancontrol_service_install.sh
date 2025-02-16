@@ -7,7 +7,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Define the source and destination paths
-SOURCE="./terramaster-fancontrol/fancontrol.service"
+SOURCE="./fancontrol.service"
 DESTINATION="/etc/systemd/system/fancontrol.service"
 
 # Step 1: Copy the service file
