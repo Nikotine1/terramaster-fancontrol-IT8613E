@@ -1,0 +1,41 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out your repository code
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      # 2. Compile your C++ code
+      - name: Build C++ program
+        run: g++ -o fancontrol fancontrol.cpp
+
+      # 3. Create a new GitHub Release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.sha }}
+          release_name: Release ${{ github.sha }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 4. Upload the compiled binary as a Release asset
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./fancontrol
+          asset_name: fancontrol
+          asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
