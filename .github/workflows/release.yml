@@ -8,32 +8,58 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Needed for creating and uploading releases
+      contents: write  # needed for creating/uploading releases
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      # 1) Prepare a short SHA in a separate step
+      # 1) Generate a short SHA (optional)
       - name: Generate short SHA
         id: short_sha
         run: echo "short_sha=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
 
+      # 2) Build your C++ program (example)
       - name: Build
         run: g++ -o fancontrol fancontrol.cpp
 
-      # 2) Create a release, referencing the short SHA output from above
+      # 3) Generate changelog from commit history
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          # Try to find the last tag in the repo
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -z "$LAST_TAG" ]; then
+            # If no tags found, collect all commits
+            echo "No previous tag found. Listing all commits."
+            LOG=$(git log --oneline)
+          else
+            echo "Previous tag is $LAST_TAG. Listing commits from $LAST_TAG to HEAD."
+            LOG=$(git log --oneline "$LAST_TAG"..HEAD)
+          fi
+
+          # Write the log to an output variable for later use
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$LOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      # 4) Create a GitHub Release
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         with:
+          # Use the short commit SHA as the tag name
           tag_name: ${{ steps.short_sha.outputs.short_sha }}
           release_name: "${{ steps.short_sha.outputs.short_sha }}"
           draft: false
           prerelease: false
+          # Pass the dynamic changelog as the release body
+          body: ${{ steps.changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # 5) Upload the compiled binary to the release
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         with:
