@@ -316,6 +316,9 @@ int main(int argc, char *argv[])
 
                 snprintf(message, sizeof(message), "fancontrol.%s %d %ld\n", drives[i], temp, time(NULL));
                 send_to_graphite(graphite_server, graphite_port, message);
+
+                snprintf(message, sizeof(message), "fancontrol.disks_max_temp %d %ld\n", maxtemp, time(NULL));
+                send_to_graphite(graphite_server, graphite_port, message);
             }
         }
 
@@ -409,15 +412,14 @@ int main(int argc, char *argv[])
         // Send PWM value to Graphite if configured
         if (graphite_server) {
             char message[256];
-            char message_temp[256];
 
             // Send PWM value
             snprintf(message, sizeof(message), "fancontrol.pwm %d %ld\n", pwm, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
 
             // Send CPU average temperature
-            snprintf(message_temp, sizeof(message_temp), "fancontrol.cpu_avg_temp %d %ld\n", cpu_avg_temp, time(NULL));
-            send_to_graphite(graphite_server, graphite_port, message_temp);
+            snprintf(message, sizeof(message), "fancontrol.cpu_avg_temp %d %ld\n", cpu_avg_temp, time(NULL));
+            send_to_graphite(graphite_server, graphite_port, message);
         }
 
     endloop:
