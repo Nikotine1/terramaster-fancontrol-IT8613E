@@ -385,8 +385,23 @@ int main(int argc, char *argv[])
         dout = kd * (error - prev_error) / timediff;
         prev_error = error;
 
+        // Send pid values to Graphite
+        if (graphite_server) {
+            char message[256];
+
+            snprintf(message, sizeof(message), "fancontrol.pout %d %ld\n", pout, time(NULL));
+            send_to_graphite(graphite_server, graphite_port, message);
+
+            snprintf(message, sizeof(message), "fancontrol.iout %d %ld\n", iout, time(NULL));
+            send_to_graphite(graphite_server, graphite_port, message);
+
+            snprintf(message, sizeof(message), "fancontrol.dout %d %ld\n", dout, time(NULL));
+            send_to_graphite(graphite_server, graphite_port, message);
+        }
+
         // Calculate new PWM value
         pwmtemp += pout + iout + dout;
+
         if ((maxtemp > overheat) || (pwmtemp > pwmmax))
         {
             pwmtemp = pwmmax;
