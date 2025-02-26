@@ -389,13 +389,13 @@ int main(int argc, char *argv[])
         if (graphite_server) {
             char message[256];
 
-            snprintf(message, sizeof(message), "fancontrol.pout %d %ld\n", pout, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.pout %f %ld\n", pout, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
 
-            snprintf(message, sizeof(message), "fancontrol.iout %d %ld\n", iout, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.iout %f %ld\n", iout, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
 
-            snprintf(message, sizeof(message), "fancontrol.dout %d %ld\n", dout, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.dout %f %ld\n", dout, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
         }
 
