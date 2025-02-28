@@ -357,14 +357,15 @@ int main(int argc, char *argv[])
 
         // Calculate time since last poll
         clock_gettime(CLOCK_MONOTONIC, &curtime);
-        timediff = ((1000000000 * (curtime.tv_sec - lasttime.tv_sec) +
-                     (curtime.tv_nsec - lasttime.tv_nsec))) /
-                   1000000000.0;
-        if (timediff == 0)
-        {
+        timediff = ((1000000000LL * (curtime.tv_sec - lasttime.tv_sec) +
+                    (curtime.tv_nsec - lasttime.tv_nsec))) / 1000000000.0;
+
+        if (timediff == 0) {
             sleep(interval);
             continue;
         }
+
+        // Update lasttime to the new time
         lasttime.tv_sec = curtime.tv_sec;
         lasttime.tv_nsec = curtime.tv_nsec;
 
@@ -407,7 +408,6 @@ int main(int argc, char *argv[])
                    "pwm = %d\n",
                    maxtemp, error, pout, iout, dout, pwm);
         }
-        clock_gettime(CLOCK_MONOTONIC, &lasttime);
 
         // Write new PWM
         ecwrite(0x6b, pwm);
@@ -425,6 +425,9 @@ int main(int argc, char *argv[])
             snprintf(message, sizeof(message), "fancontrol.cpu_avg_temp %d %ld\n", cpu_avg_temp, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
         }
+
+        // Sleep at end of loop
+        sleep(interval);
     }
 
     for (int i = 0; i < count; ++i)
