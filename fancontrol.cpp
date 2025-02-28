@@ -271,7 +271,6 @@ int main(int argc, char *argv[])
     double dout = 0;
     double timediff = 0;
     int maxtemp = 0;
-    double pwmtemp = pwm;
     struct timespec curtime;
     struct timespec lasttime;
 
@@ -370,53 +369,42 @@ int main(int argc, char *argv[])
 
         // Calculate PID values
         error = maxtemp - setpoint;
-        pout = kp * error;
 
-        iout += ki * error * timediff;
-        if (iout > imax)
-        {
-            iout = imax;
-        }
-        else if (iout < -imax)
-        {
-            iout = -imax;
-        }
+        integral += error * timediff;
 
-        dout = kd * (error - prev_error) / timediff;
+        if (integral > imax) integral = imax;
+        else if (integral < -imax) integral = -imax;
+
+        double derivative = (error - prev_error) / timediff;
         prev_error = error;
 
         // Send pid values to Graphite
         if (graphite_server) {
             char message[256];
 
-            snprintf(message, sizeof(message), "fancontrol.pout %f %ld\n", pout, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.pout %f %ld\n", kp * error, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
 
-            snprintf(message, sizeof(message), "fancontrol.iout %f %ld\n", iout, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.iout %f %ld\n", ki * integral, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
 
-            snprintf(message, sizeof(message), "fancontrol.dout %f %ld\n", dout, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.dout %f %ld\n", kd * derivative, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
         }
 
-        // Calculate new PWM value
-        pwmtemp += pout + iout + dout;
+        // Compute the new PWM
+        double newPWM = kp * error + ki * integral + kd * derivative;
 
-        if ((maxtemp > overheat) || (pwmtemp > pwmmax))
-        {
-            pwmtemp = pwmmax;
-        }
-        else if (pwmtemp < pwmmin)
-        {
-            pwmtemp = pwmmin;
-        }
-        pwm = pwmtemp;
+        if (newPWM > pwmmax) newPWM = pwmmax;
+        else if (newPWM < pwmmin) newPWM = pwmmin;
+
+        pwm = newPWM;
 
         if (debug)
         {
             printf("maxtemp = %d, error = %f, pout = %f, iout = %f, dout = %f, "
-                   "pwmtemp = %f, pwm = %d\n",
-                   maxtemp, error, pout, iout, dout, pwmtemp, pwm);
+                   "pwm = %d\n",
+                   maxtemp, error, pout, iout, dout, pwm);
         }
         clock_gettime(CLOCK_MONOTONIC, &lasttime);
 
