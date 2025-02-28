@@ -43,7 +43,7 @@ static int overheat = 50;  // Overheat limit where we drive the fans to 100%
 static int pwmmin = 80;    // Never drive the fans below this PWM value (30%)
 static double kp = 0.1;
 static double ki = 0.0;
-static double imax = 10.0;
+static double imax = 255.0;
 static double kd = 0.0;
 const static int pwmmax = 255; // Max PWM value, do not change
 const static uint8_t port = 0x2e;
@@ -120,7 +120,7 @@ void print_usage() {
            "pwmmin            Never drive the fans below this PWM value (default: 80)\n"
            "kp                Proportional coefficient (default: 0.1)\n"
            "ki                Integral coefficient (default: 0.0)\n"
-           "imax              Maximum integral value (default: 10.0)\n"
+           "imax              Maximum integral value (default: 255.0)\n"
            "kd                Derivative coefficient (default: 0.0)\n"
            "cpu_avg           Number of CPU temperature measurements for rolling average (default: 10)\n"
            "graphite_server   Graphite server IP address and port in the format <ip:port> (optional)\n");
@@ -384,13 +384,13 @@ int main(int argc, char *argv[])
         if (graphite_server) {
             char message[256];
 
-            snprintf(message, sizeof(message), "fancontrol.pout %f %ld\n", kp * error, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.pout %f %ld\n", error, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
 
-            snprintf(message, sizeof(message), "fancontrol.iout %f %ld\n", ki * integral, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.iout %f %ld\n", integral, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
 
-            snprintf(message, sizeof(message), "fancontrol.dout %f %ld\n", kd * derivative, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.dout %f %ld\n", derivative, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
         }
 
