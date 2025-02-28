@@ -362,7 +362,8 @@ int main(int argc, char *argv[])
                    1000000000.0;
         if (timediff == 0)
         {
-            goto endloop;
+            sleep(interval);
+            continue;
         }
         lasttime.tv_sec = curtime.tv_sec;
         lasttime.tv_nsec = curtime.tv_nsec;
@@ -424,9 +425,6 @@ int main(int argc, char *argv[])
             snprintf(message, sizeof(message), "fancontrol.cpu_avg_temp %d %ld\n", cpu_avg_temp, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
         }
-
-    endloop:
-        sleep(interval);
     }
 
     for (int i = 0; i < count; ++i)
