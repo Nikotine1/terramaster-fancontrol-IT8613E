@@ -39,7 +39,7 @@ static bool debug = false; // Turn on/off logging
 static int setpoint = 37;  // Default target hard drive operating temperature
 static int pwminit = 128;  // Initial PWM value (50%)
 static int interval = 10;  // How often we poll for temperatures
-static int overheat = 50;  // Overheat limit where we drive the fans to 100%
+static int overheat = 45;  // Overheat limit where we drive the fans to 100%
 static int pwmmin = 80;    // Never drive the fans below this PWM value (30%)
 static double kp = 0.1;
 static double ki = 0.0;
@@ -116,7 +116,7 @@ void print_usage() {
            "pwminit           Initial PWM value to write (default: 128)\n"
            "interval          How often we poll for temperatures in seconds (default: 10)\n"
            "overheat          Overheat temperature threshold in degrees Celsius above \n"
-           "                  which we drive the fans at maximum speed (default: 50)\n"
+           "                  which we drive the fans at maximum speed (default: 45)\n"
            "pwmmin            Never drive the fans below this PWM value (default: 80)\n"
            "kp                Proportional coefficient (default: 0.1)\n"
            "ki                Integral coefficient (default: 0.0)\n"
@@ -384,13 +384,13 @@ int main(int argc, char *argv[])
         if (graphite_server) {
             char message[256];
 
-            snprintf(message, sizeof(message), "fancontrol.pout %f %ld\n", error, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.pout %f %ld\n", error * kp, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
 
-            snprintf(message, sizeof(message), "fancontrol.iout %f %ld\n", integral, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.iout %f %ld\n", integral * ki, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
 
-            snprintf(message, sizeof(message), "fancontrol.dout %f %ld\n", derivative, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.dout %f %ld\n", derivative * kd, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
         }
 
@@ -406,7 +406,7 @@ int main(int argc, char *argv[])
         {
             printf("maxtemp = %d, error = %f, pout = %f, iout = %f, dout = %f, "
                    "pwm = %d\n",
-                   maxtemp, error, pout, iout, dout, pwm);
+                   maxtemp, error, error * kp, integral * ki, derivative * kd, pwm);
         }
 
         // Write new PWM
