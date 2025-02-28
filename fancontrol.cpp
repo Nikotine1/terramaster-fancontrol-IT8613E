@@ -395,7 +395,7 @@ int main(int argc, char *argv[])
         }
 
         // Compute the new PWM
-        double newPWM = kp * error + ki * integral + kd * derivative;
+        double newPWM = pwmmin + kp * error + ki * integral + kd * derivative;
 
         if (newPWM > pwmmax) newPWM = pwmmax;
         else if (newPWM < pwmmin) newPWM = pwmmin;
