@@ -384,18 +384,18 @@ int main(int argc, char *argv[])
         if (graphite_server) {
             char message[256];
 
-            snprintf(message, sizeof(message), "fancontrol.pout %f %ld\n", error * kp, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.p %f %ld\n", error * kp, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
 
-            snprintf(message, sizeof(message), "fancontrol.iout %f %ld\n", integral * ki, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.i %f %ld\n", integral * ki, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
 
-            snprintf(message, sizeof(message), "fancontrol.dout %f %ld\n", derivative * kd, time(NULL));
+            snprintf(message, sizeof(message), "fancontrol.d %f %ld\n", derivative * kd, time(NULL));
             send_to_graphite(graphite_server, graphite_port, message);
         }
 
         // Compute the new PWM
-        double newPWM = pwmmin + kp * error + ki * integral + kd * derivative;
+        double newPWM = pwminit + kp * error + ki * integral + kd * derivative;
 
         if (newPWM > pwmmax) newPWM = pwmmax;
         else if (newPWM < pwmmin) newPWM = pwmmin;
@@ -404,7 +404,7 @@ int main(int argc, char *argv[])
 
         if (debug)
         {
-            printf("maxtemp = %d, error = %f, pout = %f, iout = %f, dout = %f, "
+            printf("maxtemp = %d, error = %f, p = %f, i = %f, d = %f, "
                    "pwm = %d\n",
                    maxtemp, error, error * kp, integral * ki, derivative * kd, pwm);
         }
