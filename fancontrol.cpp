@@ -159,6 +159,38 @@ void send_to_graphite(const char *server, int port, const char *message) {
     close(sockfd);
 }
 
+double calculate_new_pwm(double error, double timediff, double &integral, double &prev_error) {
+    integral += error * timediff;
+
+    if (integral > imax) integral = imax;
+    else if (integral < -imax) integral = -imax;
+
+    double derivative = (error - prev_error) / timediff;
+    prev_error = error;
+
+    // Compute the new PWM
+    double newPWM = pwminit + kp * error + ki * integral + kd * derivative;
+
+    if (newPWM > pwmmax) newPWM = pwmmax;
+    else if (newPWM < pwmmin) newPWM = pwmmin;
+
+    // Send pid values to Graphite
+    if (graphite_server) {
+        char message[256];
+
+        snprintf(message, sizeof(message), "fancontrol.p %f %ld\n", error * kp, time(NULL));
+        send_to_graphite(graphite_server, graphite_port, message);
+
+        snprintf(message, sizeof(message), "fancontrol.i %f %ld\n", integral * ki, time(NULL));
+        send_to_graphite(graphite_server, graphite_port, message);
+
+        snprintf(message, sizeof(message), "fancontrol.d %f %ld\n", derivative * kd, time(NULL));
+        send_to_graphite(graphite_server, graphite_port, message);
+    }
+
+    return newPWM;
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 2)
@@ -266,9 +298,6 @@ int main(int argc, char *argv[])
     double integral = 0;
     double error = 0;
     double prev_error = 0;
-    double pout = 0;
-    double iout = 0;
-    double dout = 0;
     double timediff = 0;
     int maxtemp = 0;
     struct timespec curtime;
@@ -372,33 +401,8 @@ int main(int argc, char *argv[])
         // Calculate PID values
         error = maxtemp - setpoint;
 
-        integral += error * timediff;
-
-        if (integral > imax) integral = imax;
-        else if (integral < -imax) integral = -imax;
-
-        double derivative = (error - prev_error) / timediff;
-        prev_error = error;
-
-        // Send pid values to Graphite
-        if (graphite_server) {
-            char message[256];
-
-            snprintf(message, sizeof(message), "fancontrol.p %f %ld\n", error * kp, time(NULL));
-            send_to_graphite(graphite_server, graphite_port, message);
-
-            snprintf(message, sizeof(message), "fancontrol.i %f %ld\n", integral * ki, time(NULL));
-            send_to_graphite(graphite_server, graphite_port, message);
-
-            snprintf(message, sizeof(message), "fancontrol.d %f %ld\n", derivative * kd, time(NULL));
-            send_to_graphite(graphite_server, graphite_port, message);
-        }
-
-        // Compute the new PWM
-        double newPWM = pwminit + kp * error + ki * integral + kd * derivative;
-
-        if (newPWM > pwmmax) newPWM = pwmmax;
-        else if (newPWM < pwmmin) newPWM = pwmmin;
+        // Compute the new PWM using the function
+        double newPWM = calculate_new_pwm(error, timediff, integral, prev_error);
 
         pwm = newPWM;
 
