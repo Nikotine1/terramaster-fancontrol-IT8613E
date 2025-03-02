@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/io.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -33,6 +33,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <arpa/inet.h>
+#include <sys/io.h>
 
 // These defaults can be overridden at the CLI
 static bool debug = false; // Turn on/off logging
@@ -159,7 +160,7 @@ void send_to_graphite(const char *server, int port, const char *message) {
     close(sockfd);
 }
 
-double calculate_new_pwm(double error, double timediff, double &integral, double &prev_error) {
+double calculate_new_pwm(double maxtemp, double error, double timediff, double &integral, double &prev_error, bool debug) {
     integral += error * timediff;
 
     if (integral > imax) integral = imax;
@@ -186,6 +187,13 @@ double calculate_new_pwm(double error, double timediff, double &integral, double
 
         snprintf(message, sizeof(message), "fancontrol.d %f %ld\n", derivative * kd, time(NULL));
         send_to_graphite(graphite_server, graphite_port, message);
+    }
+
+    if (debug)
+    {
+        printf("maxtemp = %d, error = %f, p = %f, i = %f, d = %f, "
+               "pwm = %d\n",
+               maxtemp, error, error * kp, integral * ki, derivative * kd, newPWM);
     }
 
     return newPWM;
@@ -402,16 +410,9 @@ int main(int argc, char *argv[])
         error = maxtemp - setpoint;
 
         // Compute the new PWM using the function
-        double newPWM = calculate_new_pwm(error, timediff, integral, prev_error);
+        double newPWM = calculate_new_pwm(maxtemp, error, timediff, integral, prev_error, debug);
 
         pwm = newPWM;
-
-        if (debug)
-        {
-            printf("maxtemp = %d, error = %f, p = %f, i = %f, d = %f, "
-                   "pwm = %d\n",
-                   maxtemp, error, error * kp, integral * ki, derivative * kd, pwm);
-        }
 
         // Write new PWM
         ecwrite(0x6b, pwm);
