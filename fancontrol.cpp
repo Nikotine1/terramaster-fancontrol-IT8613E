@@ -131,7 +131,7 @@ void send_to_graphite(int sockfd, const char *message) {
     send(sockfd, message, strlen(message), 0);
 }
 
-double calculate_new_pwm(double maxtemp, double error, double timediff, double &integral, double &prev_error, bool debug, int graphite_sockfd) {
+double calculate_new_pwm(double error, double timediff, double &integral, double &prev_error, int graphite_sockfd) {
     integral += error * timediff;
 
     if (integral > imax) integral = imax;
@@ -158,13 +158,6 @@ double calculate_new_pwm(double maxtemp, double error, double timediff, double &
 
         snprintf(message, sizeof(message), "fancontrol.d %f %ld\n", derivative * kd, time(NULL));
         send_to_graphite(graphite_sockfd, message);
-    }
-
-    if (debug)
-    {
-        printf("maxtemp = %d, error = %f, p = %f, i = %f, d = %f, "
-               "pwm = %d\n",
-               maxtemp, error, error * kp, integral * ki, derivative * kd, newPWM);
     }
 
     return newPWM;
@@ -275,6 +268,7 @@ int main(int argc, char *argv[])
     ecwrite(0x17, 0x00);
 
     double integral = 0;
+    double derivative = 0;
     double error = 0;
     double prev_error = 0;
     double timediff = 0;
@@ -410,7 +404,13 @@ int main(int argc, char *argv[])
         error = maxtemp - setpoint;
 
         // Compute the new PWM using the function
-        double newPWM = calculate_new_pwm(maxtemp, error, timediff, integral, prev_error, debug, graphite_sockfd);
+        double newPWM = calculate_new_pwm(error, timediff, integral, prev_error, graphite_sockfd);
+
+        if (debug)
+        {
+            printf("maxtemp = %d, error = %f, p = %f, i = %f, d = %f, pwm = %d\n",
+                   maxtemp, error, error * kp, integral * ki, derivative * kd, newPWM);
+        }
 
         pwm = newPWM;
 
