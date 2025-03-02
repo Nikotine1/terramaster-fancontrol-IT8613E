@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
     struct timespec curtime;
     struct timespec lasttime;
 
-    int cputemp_values[cputemp_max_values] = {0};  // Store last 10 values
+    int *cputemp_values = (int *)calloc(cputemp_max_values, sizeof(int));  // Store last 10 values
     int cputemp_index = 0;  // Circular index
     int cputemp_count = 0;  // Number of values stored
     int cputemp_sum = 0;    // Sum of stored values
@@ -352,9 +352,6 @@ int main(int argc, char *argv[])
 
                 snprintf(message, sizeof(message), "fancontrol.%s %d %ld\n", drives[i], temp, time(NULL));
                 send_to_graphite(graphite_server, graphite_port, message);
-
-                snprintf(message, sizeof(message), "fancontrol.disks_max_temp %d %ld\n", maxtemp, time(NULL));
-                send_to_graphite(graphite_server, graphite_port, message);
             }
         }
 
@@ -391,6 +388,13 @@ int main(int argc, char *argv[])
         }
 
         if (debug) printf("Max Temperature: %d\n", maxtemp);
+
+        if (graphite_server) {
+            char message[256];
+
+            snprintf(message, sizeof(message), "fancontrol.maxtemp %d %ld\n", maxtemp, time(NULL));
+            send_to_graphite(graphite_server, graphite_port, message);
+        }
 
         // Calculate time since last poll
         clock_gettime(CLOCK_MONOTONIC, &curtime);
@@ -441,5 +445,6 @@ int main(int argc, char *argv[])
     }
     free(drives);
     iopl(0);
+    free(cputemp_values);
     return 0;
 }
