@@ -19,3 +19,5 @@ node_modules/
 
 # (Optional) If you have local docker-compose override files that you don't want in source control
 docker-compose.override.yml
+
+fancontrol
