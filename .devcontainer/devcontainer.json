@@ -1,0 +1,21 @@
+{
+    "name": "Linux Dev Container",
+    "build": {
+      "dockerfile": "../Dockerfile"
+    },
+    "customizations": {
+      "vscode": {
+        "extensions": [
+            "ms-vscode.cpptools",
+            "ms-vscode.cpplint",
+            "google.geminicodeassist",
+            "ms-vscode.cpptools-extension-pack",
+            "ms-azuretools.vscode-docker"
+        ]
+        },
+        "settings": {
+          "terminal.integrated.shell.linux": "/bin/bash"
+        }
+      },
+    "remoteUser": "developer"
+  }

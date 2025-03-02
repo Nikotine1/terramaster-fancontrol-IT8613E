@@ -1,2 +1,21 @@
-fancontrol
+# Ignore build artifacts
+build/
+out/
+bin/
+*.o
+*.obj
+*.dll
+*.exe
+*.so
+
+# macOS
+.DS_Store
+
+# VS Code settings (optional)
 .vscode/
+
+# Node modules (if you have any Node-related code)
+node_modules/
+
+# (Optional) If you have local docker-compose override files that you don't want in source control
+docker-compose.override.yml
