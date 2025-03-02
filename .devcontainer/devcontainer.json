@@ -17,5 +17,6 @@
           "terminal.integrated.shell.linux": "/bin/bash"
         }
       },
+    "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
     "remoteUser": "developer"
   }

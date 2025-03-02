@@ -42,11 +42,11 @@ static int pwminit = 128;  // Initial PWM value (50%)
 static int interval = 10;  // How often we poll for temperatures
 static int overheat = 45;  // Overheat limit where we drive the fans to 100%
 static int pwmmin = 80;    // Never drive the fans below this PWM value (30%)
-static double kp = 0.1;
-static double ki = 0.0;
+static double kp = 50.0;
+static double ki = 0.5;
 static double imax = 255.0;
 static double kd = 0.0;
-const static int pwmmax = 255; // Max PWM value, do not change
+const static int pwmmax = 255.0; // Max PWM value, do not change
 const static uint8_t port = 0x2e;
 const static uint8_t fanspeed = 200;
 static uint16_t ecbar = 0x00;
@@ -119,8 +119,8 @@ void print_usage() {
            "overheat          Overheat temperature threshold in degrees Celsius above \n"
            "                  which we drive the fans at maximum speed (default: 45)\n"
            "pwmmin            Never drive the fans below this PWM value (default: 80)\n"
-           "kp                Proportional coefficient (default: 0.1)\n"
-           "ki                Integral coefficient (default: 0.0)\n"
+           "kp                Proportional coefficient (default: 50.0)\n"
+           "ki                Integral coefficient (default: 0.5)\n"
            "imax              Maximum integral value (default: 255.0)\n"
            "kd                Derivative coefficient (default: 0.0)\n"
            "cpu_avg           Number of CPU temperature measurements for rolling average (default: 10)\n"
@@ -327,11 +327,8 @@ int main(int argc, char *argv[])
         // Execute the smartctl command for each drive in the list
         for (int i = 0; i < count; ++i)
         {
-            snprintf(smartcmd, sizeof(smartcmd),
-                     "smartctl -A -d sat /dev/%s | "
-                     "grep Temperature_Celsius | "
-                     "awk '{print $10}'",
-                     drives[i]);
+            snprintf(smartcmd, sizeof(smartcmd), "smartctl -A -d sat /dev/%s | grep Temperature_Celsius | awk '{print $10}'", drives[i]);
+
             FILE *pipe = popen(smartcmd, "r");
             if (!pipe)
             {
