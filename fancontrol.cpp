@@ -127,40 +127,11 @@ void print_usage() {
            "graphite_server   Graphite server IP address and port in the format <ip:port> (optional)\n");
 }
 
-void send_to_graphite(const char *server, int port, const char *message) {
-    int sockfd;
-    struct sockaddr_in servaddr;
-
-    // Create socket
-    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        printf("Error: Could not create socket\n");
-        return;
-    }
-
-    memset(&servaddr, 0, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(port);
-
-    // Convert IPv4 and IPv6 addresses from text to binary form
-    if (inet_pton(AF_INET, server, &servaddr.sin_addr) <= 0) {
-        printf("Invalid address/ Address not supported \n");
-        return;
-    }
-
-    // Connect to Graphite server
-    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
-        printf("Connection Failed \n");
-        return;
-    }
-
-    // Send the message
+void send_to_graphite(int sockfd, const char *message) {
     send(sockfd, message, strlen(message), 0);
-
-    // Close the socket
-    close(sockfd);
 }
 
-double calculate_new_pwm(double maxtemp, double error, double timediff, double &integral, double &prev_error, bool debug) {
+double calculate_new_pwm(double maxtemp, double error, double timediff, double &integral, double &prev_error, bool debug, int graphite_sockfd) {
     integral += error * timediff;
 
     if (integral > imax) integral = imax;
@@ -176,17 +147,17 @@ double calculate_new_pwm(double maxtemp, double error, double timediff, double &
     else if (newPWM < pwmmin) newPWM = pwmmin;
 
     // Send pid values to Graphite
-    if (graphite_server) {
+    if (graphite_sockfd > 0) {
         char message[256];
 
         snprintf(message, sizeof(message), "fancontrol.p %f %ld\n", error * kp, time(NULL));
-        send_to_graphite(graphite_server, graphite_port, message);
+        send_to_graphite(graphite_sockfd, message);
 
         snprintf(message, sizeof(message), "fancontrol.i %f %ld\n", integral * ki, time(NULL));
-        send_to_graphite(graphite_server, graphite_port, message);
+        send_to_graphite(graphite_sockfd, message);
 
         snprintf(message, sizeof(message), "fancontrol.d %f %ld\n", derivative * kd, time(NULL));
-        send_to_graphite(graphite_server, graphite_port, message);
+        send_to_graphite(graphite_sockfd, message);
     }
 
     if (debug)
@@ -317,6 +288,34 @@ int main(int argc, char *argv[])
     int cputemp_sum = 0;    // Sum of stored values
     int cpu_avg_temp = 0; // Average CPU temperature
 
+    // Setup graphite socket
+    int graphite_sockfd = -1;
+    if (graphite_server) {
+        struct sockaddr_in servaddr;
+        graphite_sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        if (graphite_sockfd < 0) {
+            printf("Error: Could not create socket\n");
+        }
+        else
+        {
+            memset(&servaddr, 0, sizeof(servaddr));
+            servaddr.sin_family = AF_INET;
+            servaddr.sin_port = htons(graphite_port);
+
+            // Convert IPv4 and IPv6 addresses from text to binary form
+            if (inet_pton(AF_INET, graphite_server, &servaddr.sin_addr) <= 0) {
+                printf("Invalid address/ Address not supported \n");
+                close(graphite_sockfd);
+                graphite_sockfd = -1;
+            }
+            else if (connect(graphite_sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+                printf("Connection Failed \n");
+                close(graphite_sockfd);
+                graphite_sockfd = -1;
+            }
+        }
+    }
+
     clock_gettime(CLOCK_MONOTONIC, &lasttime);
 
     while (true)
@@ -347,11 +346,11 @@ int main(int argc, char *argv[])
             if (debug) printf("Drive: /dev/%s has temperature %d\n", drives[i], temp);
 
             // Send disk temperature to Graphite
-            if (graphite_server) {
+            if (graphite_sockfd > 0) {
                 char message[256];
 
                 snprintf(message, sizeof(message), "fancontrol.%s %d %ld\n", drives[i], temp, time(NULL));
-                send_to_graphite(graphite_server, graphite_port, message);
+                send_to_graphite(graphite_sockfd, message);
             }
         }
 
@@ -389,11 +388,11 @@ int main(int argc, char *argv[])
 
         if (debug) printf("Max Temperature: %d\n", maxtemp);
 
-        if (graphite_server) {
+        if (graphite_sockfd > 0) {
             char message[256];
 
             snprintf(message, sizeof(message), "fancontrol.maxtemp %d %ld\n", maxtemp, time(NULL));
-            send_to_graphite(graphite_server, graphite_port, message);
+            send_to_graphite(graphite_sockfd, message);
         }
 
         // Calculate time since last poll
@@ -414,7 +413,7 @@ int main(int argc, char *argv[])
         error = maxtemp - setpoint;
 
         // Compute the new PWM using the function
-        double newPWM = calculate_new_pwm(maxtemp, error, timediff, integral, prev_error, debug);
+        double newPWM = calculate_new_pwm(maxtemp, error, timediff, integral, prev_error, debug, graphite_sockfd);
 
         pwm = newPWM;
 
@@ -423,26 +422,22 @@ int main(int argc, char *argv[])
         ecwrite(0x73, pwm);
 
         // Send PWM value to Graphite if configured
-        if (graphite_server) {
+        if (graphite_sockfd > 0) {
             char message[256];
 
             // Send PWM value
             snprintf(message, sizeof(message), "fancontrol.pwm %d %ld\n", pwm, time(NULL));
-            send_to_graphite(graphite_server, graphite_port, message);
+            send_to_graphite(graphite_sockfd, message);
 
             // Send CPU average temperature
             snprintf(message, sizeof(message), "fancontrol.cpu_avg_temp %d %ld\n", cpu_avg_temp, time(NULL));
-            send_to_graphite(graphite_server, graphite_port, message);
+            send_to_graphite(graphite_sockfd, message);
         }
 
         // Sleep at end of loop
         sleep(interval);
     }
 
-    for (int i = 0; i < count; ++i)
-    {
-        free(drives[i]);
-    }
     free(drives);
     iopl(0);
     free(cputemp_values);
