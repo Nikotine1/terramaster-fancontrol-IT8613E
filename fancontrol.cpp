@@ -408,7 +408,7 @@ int main(int argc, char *argv[])
 
         if (debug)
         {
-            printf("maxtemp = %d, error = %f, p = %f, i = %f, d = %f, pwm = %d\n",
+            printf("maxtemp = %d, error = %f, p = %f, i = %f, d = %f, pwm = %f\n",
                    maxtemp, error, error * kp, integral * ki, derivative * kd, newPWM);
         }
 
