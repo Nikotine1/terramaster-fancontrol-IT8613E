@@ -131,7 +131,7 @@ void send_to_graphite(int sockfd, const char *message) {
     send(sockfd, message, strlen(message), 0);
 }
 
-double calculate_new_pwm(double error, double timediff, double &integral, double &prev_error, int graphite_sockfd) {
+int calculate_new_pwm(double error, double timediff, double &integral, double &prev_error, int graphite_sockfd) {
     integral += error * timediff;
 
     if (integral > imax) integral = imax;
@@ -141,10 +141,12 @@ double calculate_new_pwm(double error, double timediff, double &integral, double
     prev_error = error;
 
     // Compute the new PWM
-    double newPWM = pwminit + kp * error + ki * integral + kd * derivative;
+    double newPWM_double = pwminit + kp * error + ki * integral + kd * derivative;
 
-    if (newPWM > pwmmax) newPWM = pwmmax;
-    else if (newPWM < pwmmin) newPWM = pwmmin;
+    if (newPWM_double > pwmmax) newPWM_double = pwmmax;
+    else if (newPWM_double < pwmmin) newPWM_double = pwmmin;
+
+    int newPWM = static_cast<int>(newPWM_double);
 
     // Send pid values to Graphite
     if (graphite_sockfd > 0) {
@@ -404,11 +406,11 @@ int main(int argc, char *argv[])
         error = maxtemp - setpoint;
 
         // Compute the new PWM using the function
-        double newPWM = calculate_new_pwm(error, timediff, integral, prev_error, graphite_sockfd);
+        int newPWM = calculate_new_pwm(error, timediff, integral, prev_error, graphite_sockfd);
 
         if (debug)
         {
-            printf("maxtemp = %d, error = %f, p = %f, i = %f, d = %f, pwm = %f\n",
+            printf("maxtemp = %d, error = %f, p = %f, i = %f, d = %f, pwm = %d\n",
                    maxtemp, error, error * kp, integral * ki, derivative * kd, newPWM);
         }
 

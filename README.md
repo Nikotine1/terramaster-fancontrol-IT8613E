@@ -13,8 +13,8 @@ Instead, you give it a list of drive names as an argument.
 2. I have also added reporting to a Graphite server.
 Enable it by adding ``--graphite_server=<ip address>:<port>``.
 This allows you to monitor the fan speed in Grafana:
-
 <img width="883" alt="image" src="https://github.com/Nikotine1/terramaster-fancontrol-IT8613E/assets/1538384/a89e8c9d-1ada-490a-b380-9101bc4fa552">
+3. New PID controller for the fan speed.
 
 ## Installation:
 Warning: As from Truenas 24.10.1, [the home folder is no longer executable](https://forums.truenas.com/t/shell-script-permission-denied-with-24-10-1/27941). Instead, use the data pool for your scripts.
@@ -25,21 +25,14 @@ Warning: As from Truenas 24.10.1, [the home folder is no longer executable](http
    ```
 
 2. Build with GCC.
-
-   Using Docker:
    - Pull the image:
      ```
      docker pull gcc
      ```
    - Compile fancontrol.cpp:
      ```
-     docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp gcc gcc -o fancontrol fancontrol.cpp
+     sudo docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp gcc gcc -o fancontrol fancontrol.cpp
      ```
-
-   Using Kubernetes:
-   - See [this guide](https://www.niek.be/2024/06/02/compiling-c-with-gcc-in-kubernetes-container)
-
-   Note: Truenas Scale 24.10 moved away from Kubernetes in favour of docker ([changelog](https://www.truenas.com/docs/scale/24.10/gettingstarted/scalereleasenotes/)), so just use the commands above.
 
 3. Run the compiled program.
    ```
@@ -55,11 +48,11 @@ Warning: As from Truenas 24.10.1, [the home folder is no longer executable](http
      sudo systemctl start fancontrol.service
      sudo systemctl enable fancontrol.service
      ```
-   - You will have to reinstall the service after every Truenas update. I use a shell script to do this.
+   - You will have to reinstall the service after every Truenas update. I use a shell script to do this(install_service.sh).
 
 ## Parameters:
 ```
- fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--graphite_server=<ip:port>]
+ fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--cpu_avg=<value>] [--graphite_server=<ip:port>]
 
 drive_list        A comma-separated list of drive names between quotes e.g. 'sda,sdc' (required)
 debug             Enable (1) or disable (0) debug logs (default: 0)
@@ -68,11 +61,11 @@ setpoint          Target maximum hard drive operating temperature in
 pwminit           Initial PWM value to write (default: 128)
 interval          How often we poll for temperatures in seconds (default: 10)
 overheat          Overheat temperature threshold in degrees Celsius above
-                  which we drive the fans at maximum speed (default: 50)
+                  which we drive the fans at maximum speed (default: 45)
 pwmmin            Never drive the fans below this PWM value (default: 80)
-kp                Proportional coefficient (default: 0.1)
-ki                Integral coefficient (default: 0.0)
-imax              Maximum integral value (default: 10.0)
+kp                Proportional coefficient (default: 50.0)
+ki                Integral coefficient (default: 0.5)
+imax              Maximum integral value (default: 255.0)
 kd                Derivative coefficient (default: 0.0)
 cpu_avg           Number of CPU temperature measurements for rolling average (default: 10)
 graphite_server   Graphite server IP address and port in the format <ip:port> (optional)
