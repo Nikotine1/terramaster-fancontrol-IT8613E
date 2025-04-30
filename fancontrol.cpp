@@ -447,9 +447,6 @@ int main(int argc, char *argv[])
         ecwrite(0x6b, pwm);
         ecwrite(0x73, pwm);
 
-        // Send PWM value to Graphite if configured
-        char msg[256];
-
         // Send PWM value
         snprintf(msg, sizeof(msg), "fancontrol.pwm %d %ld\n", pwm, time(NULL));
         send_to_graphite(msg);
