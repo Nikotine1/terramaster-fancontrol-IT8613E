@@ -52,8 +52,11 @@ const static uint8_t port = 0x2e;
 const static uint8_t fanspeed = 200;
 static uint16_t ecbar = 0x00;
 static int connect_graphite(void);
+void send_to_graphite(const char *message);
 static char *graphite_server = NULL;
 static int graphite_port = 0;
+static int   graphite_sockfd = -1;
+
 static int cputemp_max_values = 10; // Number of values for rolling average of cpu temperature
 
 void iowrite(uint8_t reg, uint8_t val)
@@ -183,7 +186,7 @@ void send_to_graphite(const char *message) {
     }
 }
 
-int calculate_new_pwm(double error, double timediff, double &integral, double &prev_error, int graphite_sockfd) {
+int calculate_new_pwm(double error, double timediff, double &integral, double &prev_error) {
     integral += error * timediff;
 
     if (integral > imax) integral = imax;
@@ -266,6 +269,10 @@ int main(int argc, char *argv[])
             print_usage();
             return 1;
         }
+    }
+
+    if (graphite_server) {
+        graphite_sockfd = connect_graphite();
     }
 
     if (drive_list == NULL)
@@ -426,7 +433,7 @@ int main(int argc, char *argv[])
         error = maxtemp - setpoint;
 
         // Compute the new PWM using the function
-        int newPWM = calculate_new_pwm(error, timediff, integral, prev_error, graphite_sockfd);
+        int newPWM = calculate_new_pwm(error, timediff, integral, prev_error);
 
         if (debug)
         {
