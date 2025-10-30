@@ -374,7 +374,7 @@ int main(int argc, char *argv[])
             // Compute rolling average
             cpu_avg_temp = cputemp_sum / cputemp_count;
 
-            if (cpu_avg_temp - 20 > maxtemp) maxtemp = cpu_avg_temp; // Allow for 20 degrees higher temperature than the drives
+            if (cpu_avg_temp - 20 > maxtemp) maxtemp = cpu_avg_temp - 20; // Allow for 20 degrees higher temperature than the drives
 
             if (debug) printf("Current CPU Temperature: %d°C | Rolling Avg (last %d): %d°C\n", cputemp, cputemp_count, cpu_avg_temp);
         }
