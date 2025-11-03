@@ -323,16 +323,17 @@ int main(int argc, char *argv[])
         // Execute the smartctl command for each drive in the list
         for (int i = 0; i < count; ++i)
         {
-            snprintf(smartcmd, sizeof(smartcmd), "smartctl -A -d sat /dev/%s | grep Temperature_Celsius | awk '{print $10}'", drives[i]);
+            snprintf(smartcmd, sizeof(smartcmd), "smartctl -n standby -A -d sat /dev/%s | grep Temperature_Celsius | awk '{print $10}'", drives[i]);
 
             FILE *pipe = popen(smartcmd, "r");
             if (!pipe)
             {
                 continue;
             }
-            fgets(tempstring, sizeof(tempstring), pipe);
+
+            // This can fail when drives are in standby mode. In this case we will report 0 temperature.
+            int temp = fgets(tempstring, sizeof(tempstring), pipe) ? atoi(tempstring) : 0;
             pclose(pipe);
-            int temp = atoi(tempstring);
 
             if (temp > maxtemp) maxtemp = temp;
 
